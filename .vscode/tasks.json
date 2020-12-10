@@ -1,0 +1,36 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "env-run",
+            "type": "shell",
+            "command": "/home/node/.conda/envs/consistent_depth/bin/python",
+            "args": [
+                // Ask msbuild to generate full paths for file names.
+                "main.py",
+                "--video_file",
+                "data/videos/ayush.mp4", //设置视频参数
+                "--path",
+                "results/ayush", //设置path
+                "--camera_params",
+                "1671.770118, 540, 960", //相机参数
+                "--camera_model",
+                "SIMPLE_PINHOLE",//相机模式
+                "--make_video"//生成视频
+            ],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard MS compiler pattern to detect errors, warnings and infos
+            "options": {
+                "env": {
+                    "PYTHONIOENCODING": "UTF-8"
+                }
+            }
+        }
+    ]
+}

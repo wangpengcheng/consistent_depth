@@ -27,7 +27,7 @@ def sample_pairs(frame_range, flow_ops):
     print(f"Sampled {len(pairs)} frame pairs.")
     return pairs
 
-
+# 基础视频抽象类
 class Video:
     def __init__(self, path, video_file=None):
         self.path = path

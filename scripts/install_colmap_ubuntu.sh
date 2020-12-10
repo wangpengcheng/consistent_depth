@@ -22,12 +22,12 @@ sudo apt-get install \
     libcgal-dev \
     libcgal-qt5-dev
 
-mkdir -p colmap-packages
+# mkdir -p colmap-packages
 pushd colmap-packages
 
 # Install ceres-solver [10-20 min]
 sudo apt-get install libatlas-base-dev libsuitesparse-dev
-git clone https://ceres-solver.googlesource.com/ceres-solver
+git clone https://github.com/ceres-solver/ceres-solver.git
 pushd ceres-solver
 git checkout $(git describe --tags) # Checkout the latest release
 mkdir build
@@ -44,7 +44,6 @@ git checkout dev
 git checkout tags/3.6-dev.3 -b dev-3.6
 mkdir build
 cd build
-cmake ..
 make
 sudo make install
 CC=/usr/bin/gcc-6 CXX=/usr/bin/g++-6 cmake ..

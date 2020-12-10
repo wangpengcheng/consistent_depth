@@ -18,7 +18,7 @@ from video import (Video, sample_pairs)
 class DatasetProcessor:
     def __init__(self, writer=None):
         self.writer = writer
-
+    # 创建输出文件夹
     def create_output_path(self, params):
         range_tag = f"R{params.frame_range.name}"
         flow_ops_tag = "-".join(params.flow_ops)
@@ -105,14 +105,15 @@ class DatasetProcessor:
         self.video_file = params.video_file
 
         self.out_dir = self.create_output_path(params)
-
+        # 创建视频对象
         self.video = Video(params.path, params.video_file)
+        # 创建流处理对象
         self.flow = Flow(params.path, self.out_dir)
 
         print_title(f"Processing dataset '{self.path}'")
 
         print(f"Output directory: {self.out_dir}")
-
+        # 
         if params.op == "all":
             return self.pipeline(params)
         elif params.op == "extract_frames":

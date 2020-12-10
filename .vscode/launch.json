@@ -1,0 +1,30 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        
+
+        {
+            "name": "Python: 当前文件",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "args": [
+                "--video_file",
+                "data/videos/ayush.mp4", //设置视频参数
+                "--path",
+                "results/ayush", //设置path
+                "--camera_params",
+                "1671.770118, 540, 960", //相机参数
+                "--camera_model",
+                "SIMPLE_PINHOLE",//相机模式
+                "--make_video"//生成视频
+            ],
+            "console": "integratedTerminal"
+
+        }
+    ]
+}

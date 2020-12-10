@@ -24,7 +24,7 @@ def print_title(text):
     print(text)
     print("-" * len(text))
 
-
+# 格式化输出
 def print_banner(text):
     w = 12 + len(text)
     print()

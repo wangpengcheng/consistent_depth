@@ -13,6 +13,9 @@ from tools.make_video import MakeVideoParams
 
 
 class Video3dParamsParser:
+    """[summary]
+        初始化操作
+    """
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.initialized = False
@@ -31,7 +34,7 @@ class Video3dParamsParser:
 
         self.parser.add_argument("--configure",
             choices=["default", "kitti"], default="default")
-
+        # 添加视频参数
         self.add_video_args()
         self.add_flow_args()
         self.add_calibration_args()
@@ -41,13 +44,15 @@ class Video3dParamsParser:
         self.initialized = True
 
     def add_video_args(self):
+        # 设置深度图的尺寸大小
         self.parser.add_argument("--size", type=int, default=384,
             help="Size of the (long image dimension of the) output depth maps.")
+        # 深度图的对齐要求(对于每个图像设置为整数倍数)，如果<=0,将被设置为根据深度网络自动设置，
         self.parser.add_argument("--align", type=int, default=0,
             help="Alignment requirement of the depth size (i.e, forcing each"
             " image dimension to be an integer multiple). If set <= 0 it will"
             " be set automatically, based on the requirements of the depth network.")
-
+    # 流光处理相关函数
     def add_flow_args(self):
         self.parser.add_argument(
             "--flow_ops",
@@ -58,6 +63,7 @@ class Video3dParamsParser:
             choices=frame_sampling.SamplePairsMode.names(),
             default=["hierarchical2"],
         )
+        # 数据集相关参数
         self.parser.add_argument(
             "--flow_checkpoint", choices=["FlowNet2", "FlowNet2-KITTI"],
             default="FlowNet2"
@@ -79,11 +85,11 @@ class Video3dParamsParser:
             type=frame_range.parse_frame_range,
             help="Range of depth to fine-tune, e.g., 0,2-10,21-40."
         )
-
+    # 是否存储成视频
     def add_make_video_args(self):
         self.parser.add_argument("--make_video", action="store_true")
         MakeVideoParams.add_arguments(self.parser)
-
+    
     def print(self):
         print("------------ Parameters -------------")
         args = vars(self.params)
@@ -93,7 +99,7 @@ class Video3dParamsParser:
             else:
                 print(f"{k}: {v}")
         print("-------------------------------------")
-
+    # 开始解析参数
     def parse(self, args=None, namespace=None):
         if not self.initialized:
             self.initialize()
@@ -117,7 +123,7 @@ class Video3dParamsParser:
 
         if self.params.lambda_view_baseline < 0:
             self.params.lambda_view_baseline = model.lambda_view_baseline
-
+        # 打印参数
         self.print()
 
         return self.params
