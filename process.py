@@ -14,7 +14,7 @@ from utils.frame_range import FrameRange, OptionalSet
 from utils.helpers import print_banner, print_title
 from video import (Video, sample_pairs)
 
-
+# 数据处理整体抽象类
 class DatasetProcessor:
     def __init__(self, writer=None):
         self.writer = writer
@@ -27,20 +27,22 @@ class DatasetProcessor:
         out_dir = pjoin(self.path, name)
         os.makedirs(out_dir, exist_ok=True)
         return out_dir
-
+    # 扩展帧--获取视频的关键帧信息
     def extract_frames(self, params):
-        print_banner("Extracting PTS")
+        print_banner("Extracting PTS") # 读取帧率信息
         self.video.extract_pts()
 
-        print_banner("Extracting frames")
-        self.video.extract_frames()
-
+        print_banner("Extracting frames") # 对其进行扩展
+        self.video.extract_frames() # 将视频扩展为帧
+    # 流水线化相关操作
     def pipeline(self, params):
+        # 将视频扩展生单帧图片
         self.extract_frames(params)
 
         print_banner("Downscaling frames (raw)")
+        # 将视频缩放成float32的基本数据
         self.video.downscale_frames("color_down", params.size, "raw")
-
+        # 将图片更改为png格式
         print_banner("Downscaling frames (png)")
         self.video.downscale_frames("color_down_png", params.size, "png")
 
@@ -109,7 +111,7 @@ class DatasetProcessor:
         self.video = Video(params.path, params.video_file)
         # 创建流处理对象
         self.flow = Flow(params.path, self.out_dir)
-
+        # 输出相关的信息
         print_title(f"Processing dataset '{self.path}'")
 
         print(f"Output directory: {self.out_dir}")

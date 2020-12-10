@@ -21,7 +21,7 @@ if six.PY2:
 warnings.simplefilter("ignore", ResourceWarning)
 warnings.simplefilter("ignore", UserWarning)
 
-
+# 将图片缩放到指定大小
 # resizes the image
 def resize_to_target(image, max_size, align=1, suppress_messages=False):
     if not suppress_messages:
@@ -48,7 +48,7 @@ def resize_to_target(image, max_size, align=1, suppress_messages=False):
     )
     return image
 
-
+# 图像加载函数
 # Reads an image and returns a normalized float buffer (0-1 range). Corrects
 # rotation based on EXIF tags.
 def load_image(file_name, max_size=None, align=1, suppress_messages=False):
@@ -139,6 +139,7 @@ def save_raw_float32_image(file_name, image):
         h = 0
         w = 0
         d = 1
+        # 将对应数据转换为32位数据
         if len(dims) == 2:
             h, w = image.shape
             float32_image = np.transpose(image).astype(np.float32)
@@ -168,9 +169,10 @@ def save_raw_float32_image(file_name, image):
         ):
             f.write(chunk.tobytes("C"))
 
-
+# 存储图片
 def save_image(file_name, image):
     ext = os.path.splitext(file_name)[1].lower()
+    # 将图像存储为float32的关键数据
     if ext == ".raw":
         save_raw_float32_image(file_name, image)
     else:

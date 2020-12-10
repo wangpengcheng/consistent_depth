@@ -14,7 +14,7 @@ from utils.helpers import mkdir_ifnotexists
 ffmpeg = "ffmpeg"
 ffprobe = "ffprobe"
 
-
+# 查找相似的图片帧
 def sample_pairs(frame_range, flow_ops):
     #TODO: update the frame range with reconstruction range
     name_mode_map = frame_sampling.SamplePairsMode.name_mode_map()
@@ -53,7 +53,7 @@ class Video:
         if self.check_extracted_pts():
             # frames.txt exists and checked OK.
             return
-
+        # 检查是否存在文件
         if not os.path.exists(self.video_file):
             sys.exit("ERROR: input video file '%s' not found.", self.video_file)
 
@@ -65,7 +65,7 @@ class Video:
         image = image_io.load_image(tmp_file)
         height = image.shape[0]
         width = image.shape[1]
-        os.remove(tmp_file)
+        os.remove(tmp_file) # 删除中间文件
         if os.path.exists(tmp_file):
             sys.exit("ERROR: unable to remove '%s'" % tmp_file)
 
@@ -74,7 +74,7 @@ class Video:
             if line[: len(token)] != token:
                 sys.exit("ERROR: record is malformed, expected to find '%s'." % token)
             return line[len(token) :]
-
+        # 查询视频帧以及关键时间点
         ffprobe_cmd = "%s %s -select_streams v:0 -show_frames" % (
             ffprobe,
             self.video_file,
@@ -87,7 +87,7 @@ class Video:
             pts.append(parse_line(line, "pkt_pts_time="))
         self.frame_count = len(pts)
         print("%d frames detected." % self.frame_count)
-
+        # 设置帧输出文件
         pts_file = "%s/frames.txt" % self.path
         with open(pts_file, "w") as file:
             file.write("%d\n" % len(pts))
@@ -95,18 +95,18 @@ class Video:
             file.write("%s\n" % height)
             for t in pts:
                 file.write("%s\n" % t)
-
+        # 再次确认文件
         self.check_extracted_pts()
 
     def check_frames(self, frame_dir, extension, frames=None):
         if not os.path.isdir(frame_dir):
             return False
-
+        # 获取文件夹中的文件
         files = os.listdir(frame_dir)
         files = [n for n in files if n.endswith(extension)]
         if len(files) == 0:
             return False
-
+        # 随机选帧进行生成
         if frames is None:
             frames = range(self.frame_count)
 
@@ -122,18 +122,18 @@ class Video:
         print("Frames found, checked OK.")
 
         return True
-
+    # 将视频扩展成为一张张的图片
     def extract_frames(self):
-        frame_dir = "%s/color_full" % self.path
+        frame_dir = "%s/color_full" % self.path # 设置输出文件夹
         mkdir_ifnotexists(frame_dir)
-
+        # 检查frame是否已经存在
         if self.check_frames(frame_dir, "png"):
             # Frames are already extracted and checked OK.
             return
 
         if not os.path.exists(self.video_file):
             sys.exit("ERROR: input video file '%s' not found.", self.video_file)
-
+        # 不存在的话，就生成关键帧
         cmd = "%s -i %s -start_number 0 -vsync 0 %s/frame_%%06d.png" % (
             ffmpeg,
             self.video_file,
@@ -148,31 +148,32 @@ class Video:
                 "ERROR: %d frames extracted, but %d PTS entries."
                 % (count, self.frame_count)
             )
-
+        # 再次进行帧确认
         self.check_frames(frame_dir, "png")
-
+    # 对所有帧进行缩放
     def downscale_frames(
         self, subdir, max_size, ext, align=16, full_subdir="color_full"
     ):
         full_dir = pjoin(self.path, full_subdir)
         down_dir = pjoin(self.path, subdir)
-
+        # 创建缩放的文件夹
         mkdir_ifnotexists(down_dir)
-
+        # 检查缩放文件夹是否存在
         if self.check_frames(down_dir, ext):
             # Frames are already extracted and checked OK.
             return
-
+        # 检查所有帧
         for i in range(self.frame_count):
             full_file = "%s/frame_%06d.png" % (full_dir, i)
             down_file = ("%s/frame_%06d." + ext) % (down_dir, i)
             suppress_messages = (i > 0)
+            # 加载图片
             image = image_io.load_image(
                 full_file, max_size=max_size, align=align,
                 suppress_messages=suppress_messages
             )
             image = image[..., ::-1]  # Channel swizzle
-
+            # 根据加载格式进行数据修改
             if ext == "raw":
                 image_io.save_raw_float32_image(down_file, image)
             else:
