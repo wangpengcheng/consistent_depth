@@ -66,9 +66,9 @@ class DatasetProcessor:
         ft_frame_range = frame_range.intersection(OptionalSet(set(valid_frames)))
         print("Filtered out frames",
             sorted(set(frame_range.frames()) - set(ft_frame_range.frames())))
-
+        # 开始计算流
         print_banner("Compute flow")
-
+        # 查找相似帧
         frame_pairs = sample_pairs(ft_frame_range, params.flow_ops)
         self.flow.compute_flow(frame_pairs, params.flow_checkpoint)
 

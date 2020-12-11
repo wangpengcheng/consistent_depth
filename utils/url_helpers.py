@@ -6,7 +6,7 @@ from os.path import join as pjoin
 import wget
 from zipfile import ZipFile
 
-
+# 获取模型的地址
 def get_model_from_url(
     url: str, local_path: str, is_zip: bool = False, path_root: str = "checkpoints"
 ) -> str:

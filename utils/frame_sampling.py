@@ -30,11 +30,11 @@ class SamplePairsOptions(NamedTuple):
     mode: SamplePairsMode
     params: Dict[str, Any] = {}
 
-
+# 定义基础数据集合
 Pair = namedtuple("Pair", ["first", "second"])
-Pairs_t = Set[Pair]
+Pairs_t = Set[Pair] # 设置属性集合
 
-
+# 相似属性
 class SamplePairs:
     @classmethod
     def sample(
@@ -46,6 +46,7 @@ class SamplePairs:
         num_frames = len(frame_range)
 
         rel_pairs = set()
+        # 创建真实的相似对
         for opt in opts:
             rel_pairs = rel_pairs.union(cls.factory(num_frames, opt, two_way))
 
@@ -65,13 +66,14 @@ class SamplePairs:
     def factory(
         cls, num_frames: int, opt: SamplePairsOptions, two_way: bool
     ) -> Pairs_t:
+        # 函数对应hash表
         funcs = {
             SamplePairsMode.EXHAUSTED: cls.sample_exhausted,
             SamplePairsMode.CONSECUTIVE: cls.sample_consecutive,
             SamplePairsMode.HIERARCHICAL: cls.sample_hierarchical,
             SamplePairsMode.HIERARCHICAL2: cls.sample_hierarchical2,
         }
-
+        # 执行对应的函数
         return funcs[opt.mode](num_frames, two_way, **opt.params)
 
     @staticmethod
@@ -87,23 +89,33 @@ class SamplePairs:
             min_dist, max_dist: minimum and maximum distance to the neighbour
         """
         assert min_dist >= 1
-
+        # 计算最大最远距离
         if max_dist is None:
             max_dist = num_frames - 1
+        # 设置最小等级
         min_level = np.ceil(np.log2(min_dist)).astype(int)
+        # 设置最大等级
         max_level = np.floor(np.log2(max_dist)).astype(int)
-
+        # 设置每个阶梯的等级
         step_level = (lambda l: max(0, l - 1)) if include_mid_point else (lambda l: l)
+        # 设置signs
         signs = (-1, 1) if two_way else (1,)
         pairs = set()
+        # 遍历所有可能间隔
         for level in range(min_level, max_level + 1):
+            # 计算对应的距离
             dist = 1 << level
+            # 计算步长
             step = 1 << step_level(level)
+            # 按照步长计算所有帧
             for start in range(0, num_frames, step):
+                # 遍历前后范围(-1,1)
                 for sign in signs:
+                    # 计算尾部
                     end = start + sign * dist
                     if end < 0 or end >= num_frames:
                         continue
+                    # 讲对帧数据添加上去
                     pairs.add(Pair(start, end))
         return pairs
 

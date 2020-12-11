@@ -42,7 +42,7 @@ class Flow:
     @staticmethod
     def max_size():
         return 1024
-
+    # 查找相似度高的图像
     def check_good_flow_pairs(self, frame_pairs, overlap_ratio):
         flow_list_path = pjoin(self.out_path, "flow_list_%.2f.json" % overlap_ratio)
         if os.path.isfile(flow_list_path):
@@ -50,20 +50,22 @@ class Flow:
 
         def ratio(mask):
             return np.sum(mask > 0) / np.prod(mask.shape[:2])
-
+        # 计算相似结果
         mask_fmt = pjoin(self.path, "mask", "mask_{:06d}_{:06d}.png")
         result_pairs = []
         checked_pairs = set()
+        # 遍历生成
         for pair in frame_pairs:
             if pair in checked_pairs:
                 continue
 
             cur_pairs = [pair, pair[::-1]]
             checked_pairs.update(cur_pairs)
-
+            # 打开掩码数据
             mask_fns = [mask_fmt.format(*ids) for ids in cur_pairs]
             masks = [cv2.imread(fn, 0) for fn in mask_fns]
             mask_ratios = [ratio(m) for m in masks]
+            # 将相似图片添加上去
             if all(r >= overlap_ratio for r in mask_ratios):
                 result_pairs.extend(cur_pairs)
             else:
@@ -80,11 +82,11 @@ class Flow:
             "Frame distance statistics: max = %d, mean = %d, median = %d" %
             (np.amax(frame_dists), np.mean(frame_dists), np.median(frame_dists))
         )
-
+        # 将其写入文件中
         with open(flow_list_path, "w") as f:
             json.dump(list(result_pairs), f)
         return flow_list_path
-
+    # 确认文件是否存在
     def check_flow_files(self, index_pairs):
         flow_dir = "%s/flow" % self.path
         for (i, j) in index_pairs:
@@ -92,7 +94,7 @@ class Flow:
             if not os.path.exists(file):
                 return False
         return True
-
+    # 计算对应的流
     def compute_flow(self, index_pairs, checkpoint):
         """Run Flownet2 with specific <checkpoint> (FlowNet2 or finetuned on KITTI)
         Note that we don't fit homography first for FlowNet2-KITTI model.
@@ -143,7 +145,7 @@ class Flow:
         optical_flow_flownet2_homography.process(args)
 
         self.check_flow_files(index_pairs)
-
+    # 计算水平流
     def visualize_flow(self, warp=False):
         flow_fmt = pjoin(self.path, "flow", "flow_{:06d}_{:06d}.raw")
         mask_fmt = pjoin(self.path, "mask", "mask_{:06d}_{:06d}.png")
