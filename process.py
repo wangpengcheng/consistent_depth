@@ -42,25 +42,25 @@ class DatasetProcessor:
         print_banner("Downscaling frames (raw)")
         # 将视频缩放成float32的基本数据
         self.video.downscale_frames("color_down", params.size, "raw")
-        # 将图片更改为png格式
+        # 将图片更改为png格式--生成对应的关键文件
         print_banner("Downscaling frames (png)")
         self.video.downscale_frames("color_down_png", params.size, "png")
-
+        # 将图片缩放为flow
         print_banner("Downscaling frames (for flow)")
         self.video.downscale_frames("color_flow", Flow.max_size(), "png", align=64)
 
         frame_range = FrameRange(
             frame_range=params.frame_range.set, num_frames=self.video.frame_count,
         )
-        frames = frame_range.frames()
-
+        frames = frame_range.frames()   # frame值的集合
+        # 计算初始化深度
         print_banner("Compute initial depth")
 
         ft = DepthFineTuner(self.out_dir, frames, params)
         initial_depth_dir = pjoin(self.path, f"depth_{params.model_type}")
         if not self.video.check_frames(pjoin(initial_depth_dir, "depth"), "raw"):
             ft.save_depth(initial_depth_dir)
-
+        # 查看存在的帧文件
         valid_frames = calibrate_scale(self.video, self.out_dir, frame_range, params)
         # frame range for finetuning:
         ft_frame_range = frame_range.intersection(OptionalSet(set(valid_frames)))

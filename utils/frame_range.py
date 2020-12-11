@@ -7,11 +7,11 @@ from collections import namedtuple
 # set is an OptionalSet as below
 NamedOptionalSet = namedtuple("NamedOptionalSet", ["name", "set"])
 
-
+# 选项集合抽象类
 class OptionalSet:
     def __init__(self, set: Optional[Set] = None):
         self.set = set
-
+    # 拷贝构造函数
     def intersection(self, other):
         if self.set is None:
             return other
@@ -22,7 +22,7 @@ class OptionalSet:
     def __str__(self):
         return str(self.set)
 
-
+# 帧范围构造函数,计算指定范围内的感兴趣的帧索引
 class FrameRange:
     """
     Compute the indices of frames we are interested in from the specified range.
@@ -39,7 +39,7 @@ class FrameRange:
 
     def intersection(self, other: OptionalSet):
         return FrameRange(self.frame_range.intersection(other))
-
+    # 更新关键数据
     def update(self, frame_range: OptionalSet):
         assert frame_range.set is not None
 

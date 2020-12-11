@@ -135,7 +135,7 @@ def make_tag(params):
         + f"_O{params.optimizer.lower()}"
     )
 
-
+# 深度计算关键类
 class DepthFineTuner:
     def __init__(self, range_dir, frames, params):
         self.frames = frames
@@ -145,10 +145,10 @@ class DepthFineTuner:
         self.out_dir = pjoin(self.range_dir, make_tag(params))
         os.makedirs(self.out_dir, exist_ok=True)
         print(f"Fine-tuning directory: '{self.out_dir}'")
-
+        # checkpoints文件路径
         self.checkpoints_dir = pjoin(self.out_dir, "checkpoints")
         os.makedirs(self.checkpoints_dir, exist_ok=True)
-
+        # 查询生成的模型
         model = get_depth_model(params.model_type)
         self.model = model()
 

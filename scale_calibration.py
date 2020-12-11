@@ -150,7 +150,7 @@ def check_frames(
         for n in names
     )
 
-
+# 标准尺度
 def calibrate_scale(video, out_dir, frame_range, args):
     # COLMAP reconstruction.
     print_banner("COLMAP reconstruction")

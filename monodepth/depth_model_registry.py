@@ -12,7 +12,7 @@ from typing import List
 def get_depth_model_list() -> List[str]:
     return ["mc", "midas2", "monodepth2"]
 
-
+# 工厂模式生成对应的模型
 def get_depth_model(type: str) -> DepthModel:
     if type == "mc":
         return MannequinChallengeModel
