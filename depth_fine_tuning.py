@@ -62,7 +62,7 @@ class DepthFineTuningParams:
 
         return parser
 
-
+# 输出loss计算状态
 def log_loss_stats(
     writer: SummaryWriter,
     name_prefix: str,
@@ -89,7 +89,7 @@ def log_loss_stats(
         if log_histogram:
             writer.add_histogram(sub_loss_full_name, loss_value, n)
 
-
+# 写入中间文献
 def write_summary(
     writer, mode_name, input_images, depth, metadata, n_iter
 ):
@@ -102,7 +102,7 @@ def write_summary(
 
     def to_vis(x):
         return x[:8].transpose(0, 1).reshape((-1,) + x.shape[DIM:])
-
+    # 
     writer.add_image(
         mode_name + '/image',
         vutils.make_grid(to_vis(input_images), nrow=B, normalize=True), n_iter)
@@ -126,7 +126,7 @@ def log_loss(
     writer.add_scalar(main_loss_name, loss, niters)
     log_loss_stats(writer, main_loss_name, loss_meta, niters)
 
-
+# 创建标签
 def make_tag(params):
     return (
         LossParams.make_str(params)
@@ -151,7 +151,7 @@ class DepthFineTuner:
         # 查询生成的模型
         model = get_depth_model(params.model_type)
         self.model = model()
-
+        # 查询存在GPU
         num_gpus = torch.cuda.device_count()
         print(f"Using {num_gpus} GPUs.")
         if num_gpus > 1:

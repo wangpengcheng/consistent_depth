@@ -10,13 +10,23 @@ import tempfile
 from utils import (frame_sampling, image_io)
 from utils.helpers import mkdir_ifnotexists
 
-
+# 
 ffmpeg = "ffmpeg"
 ffprobe = "ffprobe"
 
 # 查找相似的图片帧
 def sample_pairs(frame_range, flow_ops):
-    #TODO: update the frame range with reconstruction range
+    """[summary]
+
+    Args:
+        frame_range ([type]): [description]
+        flow_ops ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    #TODO: update the frame range with reconstruction range 
+    #TODO: 更新帧范围为重构范围
     name_mode_map = frame_sampling.SamplePairsMode.name_mode_map()
     opts = [
         frame_sampling.SamplePairsOptions(mode=name_mode_map[op]) for op in flow_ops
@@ -99,6 +109,7 @@ class Video:
         self.check_extracted_pts()
 
     def check_frames(self, frame_dir, extension, frames=None):
+
         if not os.path.isdir(frame_dir):
             return False
         # 获取文件夹中的文件

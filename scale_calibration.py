@@ -44,14 +44,14 @@ def prepare_colmap_color(video):
         Returns:
             output_directory
     """
-    print('Preparint color input for COLMAP...')
-
+    print('Preparint color input for COLMAP...') # 计算输入的colMap
+    # 输出文件夹
     out_dir = pjoin(video.path, 'color_colmap_dense')
-    dynamic_mask_dir = pjoin(video.path, 'mask_dynamic')
-    color_src_dir = pjoin(video.path, 'color_full')
+    dynamic_mask_dir = pjoin(video.path, 'mask_dynamic') # 
+    color_src_dir = pjoin(video.path, 'color_full') # 全彩色图像地址
     if not os.path.isdir(dynamic_mask_dir):
         return color_src_dir
-
+    # 存在输出问夹
     if video.check_frames(out_dir, 'png'):
         return out_dir
 
@@ -150,21 +150,21 @@ def check_frames(
         for n in names
     )
 
-# 标准尺度
+# 标准尺度 缩放
 def calibrate_scale(video, out_dir, frame_range, args):
-    # COLMAP reconstruction.
+    # COLMAP reconstruction. 重键colMap
     print_banner("COLMAP reconstruction")
 
     colmap_dir = pjoin(video.path, 'colmap_dense')
     src_meta_file = pjoin(colmap_dir, "metadata.npz")
-
+    # 计算colmap
     colmap = COLMAPProcessor(args.colmap_bin_path)
     dense_dir = colmap.dense_dir(colmap_dir, 0)
-
+    # 确认元数据文件是否存在
     if os.path.isfile(src_meta_file):
         print("Checked metadata file exists.")
     else:
-        color_dir = prepare_colmap_color(video)
+        color_dir = prepare_colmap_color(video)  # 计算col map
 
         if not colmap.check_dense(
             dense_dir, color_dir, valid_ratio=args.dense_frame_ratio
@@ -185,14 +185,14 @@ def calibrate_scale(video, out_dir, frame_range, args):
         )
         np.savez(src_meta_file, intrinsics=intrinsics, extrinsics=extrinsics)
 
-    # Convert COLMAP dense depth maps to .raw file format.
+    # Convert COLMAP dense depth maps to .raw file format. 将深度图像转换为.raw的rgb图像
     print_banner("Convert COLMAP depth maps")
 
     converted_depth_fmt = pjoin(
         video.path, "depth_colmap_dense", "depth", "frame_{:06d}.raw"
     )
 
-    # convert colmap dense depths to .raw
+    # convert colmap dense depths to .raw 将其转换为.raw图像
     converted_depth_dir = os.path.dirname(converted_depth_fmt)
     dense_depth_dir = pjoin(dense_dir, "stereo", "depth_maps")
     frames = frame_range.frames()

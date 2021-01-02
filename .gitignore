@@ -143,3 +143,6 @@ results/
 
 # data
 data/
+
+# doc
+doc/build/*

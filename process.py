@@ -16,10 +16,13 @@ from video import (Video, sample_pairs)
 
 # 数据处理整体抽象类
 class DatasetProcessor:
+    """[summary]
+    """
     def __init__(self, writer=None):
         self.writer = writer
     # 创建输出文件夹
     def create_output_path(self, params):
+        
         range_tag = f"R{params.frame_range.name}"
         flow_ops_tag = "-".join(params.flow_ops)
         name = f"{range_tag}_{flow_ops_tag}_{params.model_type}"
@@ -36,6 +39,7 @@ class DatasetProcessor:
         self.video.extract_frames() # 将视频扩展为帧
     # 流水线化相关操作
     def pipeline(self, params):
+        
         # 将视频扩展生单帧图片
         self.extract_frames(params)
 
@@ -48,16 +52,16 @@ class DatasetProcessor:
         # 将图片缩放为flow
         print_banner("Downscaling frames (for flow)")
         self.video.downscale_frames("color_flow", Flow.max_size(), "png", align=64)
-
+        # 生成图片范围
         frame_range = FrameRange(
             frame_range=params.frame_range.set, num_frames=self.video.frame_count,
         )
         frames = frame_range.frames()   # frame值的集合
         # 计算初始化深度
         print_banner("Compute initial depth")
-
+        # 构造深度微调器
         ft = DepthFineTuner(self.out_dir, frames, params)
-        initial_depth_dir = pjoin(self.path, f"depth_{params.model_type}")
+        initial_depth_dir = pjoin(self.path, f"depth_{params.model_type}") # 获取深度模型路径
         if not self.video.check_frames(pjoin(initial_depth_dir, "depth"), "raw"):
             ft.save_depth(initial_depth_dir)
         # 查看存在的帧文件
@@ -68,7 +72,7 @@ class DatasetProcessor:
             sorted(set(frame_range.frames()) - set(ft_frame_range.frames())))
         # 开始计算流
         print_banner("Compute flow")
-        # 查找相似帧
+        # 查找相似帧-注意这里是随机查找，相似的一对
         frame_pairs = sample_pairs(ft_frame_range, params.flow_ops)
         self.flow.compute_flow(frame_pairs, params.flow_checkpoint)
 
@@ -115,8 +119,9 @@ class DatasetProcessor:
         print_title(f"Processing dataset '{self.path}'")
 
         print(f"Output directory: {self.out_dir}")
-        # 
+        # 设置对应的扩展类别
         if params.op == "all":
+            # 在这里进行流的处理
             return self.pipeline(params)
         elif params.op == "extract_frames":
             return self.extract_frames(params)

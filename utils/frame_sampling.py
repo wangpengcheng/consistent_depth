@@ -6,8 +6,8 @@ from enum import Enum, unique, auto
 from typing import Iterable, NamedTuple, Dict, Any, Set
 import numpy as np
 
-
 from .frame_range import FrameRange
+
 
 @unique
 class SamplePairsMode(Enum):
@@ -27,14 +27,16 @@ class SamplePairsMode(Enum):
 
 # param is default to {} while mode is required
 class SamplePairsOptions(NamedTuple):
-    mode: SamplePairsMode
-    params: Dict[str, Any] = {}
+    mode: SamplePairsMode  # 模型数据
+    params: Dict[str, Any] = {}  # 存储的名称和字典
+
 
 # 定义基础数据集合
 Pair = namedtuple("Pair", ["first", "second"])
-Pairs_t = Set[Pair] # 设置属性集合
+Pairs_t = Set[Pair]  # 设置属性集合
 
-# 相似属性
+
+# 相似对构造函数
 class SamplePairs:
     @classmethod
     def sample(
@@ -52,20 +54,19 @@ class SamplePairs:
 
         pairs = set()
         for rel_pair in rel_pairs:
-            pair = Pair(
-                frame_range.index_to_frame[rel_pair[0]],
-                frame_range.index_to_frame[rel_pair[1]]
-            )
+            pair = Pair(frame_range.index_to_frame[rel_pair[0]],
+                        frame_range.index_to_frame[rel_pair[1]])
             # Filter out pairs where no end is in depth_frames. Can be optimized
             # when constructing these pairs
-            if (pair[0] in frame_range.frames() or pair[1] in frame_range.frames()):
+            if (pair[0] in frame_range.frames()
+                    or pair[1] in frame_range.frames()):
                 pairs.add(pair)
         return pairs
 
+    # 静态工厂方法，用来创建对应的函数选择对象
     @classmethod
-    def factory(
-        cls, num_frames: int, opt: SamplePairsOptions, two_way: bool
-    ) -> Pairs_t:
+    def factory(cls, num_frames: int, opt: SamplePairsOptions,
+                two_way: bool) -> Pairs_t:
         # 函数对应hash表
         funcs = {
             SamplePairsMode.EXHAUSTED: cls.sample_exhausted,
@@ -76,6 +77,7 @@ class SamplePairs:
         # 执行对应的函数
         return funcs[opt.mode](num_frames, two_way, **opt.params)
 
+    # 静态方法，查找相似等级函数
     @staticmethod
     def sample_hierarchical(
         num_frames: int,
@@ -92,14 +94,16 @@ class SamplePairs:
         # 计算最大最远距离
         if max_dist is None:
             max_dist = num_frames - 1
-        # 设置最小等级
+        # 设置最小等级，主要是对最小距离求2的对数
         min_level = np.ceil(np.log2(min_dist)).astype(int)
         # 设置最大等级
         max_level = np.floor(np.log2(max_dist)).astype(int)
-        # 设置每个阶梯的等级
-        step_level = (lambda l: max(0, l - 1)) if include_mid_point else (lambda l: l)
+        # 设置每个阶梯的等级，如果含有中间值时，查找最大值
+        step_level = (lambda l: max(0, l - 1)) if include_mid_point else (
+            lambda l: l)
         # 设置signs
-        signs = (-1, 1) if two_way else (1,)
+        signs = (-1, 1) if two_way else (1, )
+        # set集合
         pairs = set()
         # 遍历所有可能间隔
         for level in range(min_level, max_level + 1):
@@ -115,14 +119,17 @@ class SamplePairs:
                     end = start + sign * dist
                     if end < 0 or end >= num_frames:
                         continue
-                    # 讲对帧数据添加上去
+                    # 将对帧数据添加上去
                     pairs.add(Pair(start, end))
         return pairs
 
+    # 修饰静态方法，查找相似等级2--注意这里含有中间值点
     @classmethod
-    def sample_hierarchical2(
-        cls, num_frames: int, two_way: bool, min_dist=1, max_dist=None
-    ) -> Pairs_t:
+    def sample_hierarchical2(cls,
+                             num_frames: int,
+                             two_way: bool,
+                             min_dist=1,
+                             max_dist=None) -> Pairs_t:
         return cls.sample_hierarchical(
             num_frames,
             two_way,
@@ -133,13 +140,15 @@ class SamplePairs:
 
     @classmethod
     def sample_consecutive(cls, num_frames: int, two_way: bool) -> Pairs_t:
-        return cls.sample_hierarchical(num_frames, two_way, min_dist=1, max_dist=1)
+        return cls.sample_hierarchical(num_frames,
+                                       two_way,
+                                       min_dist=1,
+                                       max_dist=1)
 
     @staticmethod
     def sample_exhausted(cls, num_frames: int, two_way: bool) -> Pairs_t:
-        second_frame_range = (
-            (lambda i, N: range(N)) if two_way else (lambda i, N: range(i + 1, N))
-        )
+        second_frame_range = ((lambda i, N: range(N)) if two_way else
+                              (lambda i, N: range(i + 1, N)))
 
         pairs = set()
         for i in range(num_frames):
